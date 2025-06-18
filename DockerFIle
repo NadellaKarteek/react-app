@@ -1,11 +1,23 @@
+# - Comment, ignored by docker
+# - Docker Directives/instructions will be in UPPER CASE
+# FROM -> used for specifying base image
+FROM node:22-alpine AS build
 
+# RUN -> run commands
+RUN mkdir /lms-app
 
-# - Comments ignores the line
-# FROM - is used to set BASE image
-# FROM is used to set BASE functionality
-# FROM ubuntu:22 --> Repeat all the process of setting up nginx again
+# WORKDIR ->  set project path
+WORKDIR /lms-app
 
-FROM nginx
+# COPY -> used for copying files from HOST to YOUR CUSTOM IMAGE
+COPY . /lms-app
 
-# COPY - is used to copy files from HOST to Above Image
-COPY . /usr/share/nginx/html
+# Prepare Build
+RUN npm install
+RUN npm run build
+
+# Prepare Deployment
+FROM nginx:alpine
+
+# Copy Build Artifacts
+COPY --from=build /lms-app/build /usr/share/nginx/html
